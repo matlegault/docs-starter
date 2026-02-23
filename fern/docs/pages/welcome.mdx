@@ -1,91 +1,70 @@
 ---
-title: Welcome to Fern!
-subtitle: Everything you need to build the best developer experience
+title: Plant Store API
+subtitle: The easiest way to manage your plant inventory, orders, and customers
 slug: welcome
 ---
 
-This repository is a starter template for building documentation with [Fern](https://buildwithfern.com). It includes a sample Plant Store API to demonstrate how Fern generates interactive API reference documentation from an OpenAPI specification.
+Build powerful plant commerce experiences with the Plant Store API. Whether you're building a storefront, managing inventory, or handling customer accounts — our RESTful API has you covered.
 
-Use this template to get started quickly, then replace the sample content with your own API and documentation.
+## What you can do
 
-## What's included
+<CardGroup cols={2}>
+  <Card
+    title="Browse & manage plants"
+    icon="duotone leaf"
+    href="/api-reference/plant/get-plant-by-id"
+  >
+    Add, update, and search your full plant catalog with rich metadata like status, tags, and photos.
+  </Card>
+  <Card
+    title="Process orders"
+    icon="duotone cart-shopping"
+    href="/api-reference/plant/add-plant"
+  >
+    Place orders, track inventory quantities, and manage your storefront with ease.
+  </Card>
+  <Card
+    title="Manage users"
+    icon="duotone users"
+    href="/api-reference/user/create-user"
+  >
+    Create and manage customer accounts, handle authentication, and control access.
+  </Card>
+  <Card
+    title="Try it live"
+    icon="duotone terminal"
+    href="/api-reference"
+  >
+    Use the interactive API Explorer to test endpoints directly from the docs.
+  </Card>
+</CardGroup>
 
-This starter template contains everything you need to publish documentation:
-
-<Files>
-  <File name="docs.yml" comment="Configures navigation, theme, and hosting" />
-  <File name="fern.config.json" comment="Sets your organization name and CLI version" />
-  <File name="openapi.yaml" comment="Sample Plant Store API specification" />
-  <Folder name="docs" defaultOpen>
-    <Folder name="pages" comment="Markdown content for your documentation" />
-    <Folder name="assets" comment="Logos, favicon, and other assets" />
-  </Folder>
-</Files>
-
-## Getting started
+## Get started
 
 <Steps>
-<Step title="Clone this repository">
+<Step title="Get your API key">
+
+Sign up at [plantstore.dev](https://plantstore.dev) and grab your API key from the dashboard.
+
+</Step>
+
+<Step title="Make your first request">
 
 ```bash
-git clone <your-template-repo.git>
-cd docs-starter
+curl -X GET "https://api.plantstore.dev/v3/plant/1" \
+  -H "api_key: YOUR_API_KEY"
 ```
 
 </Step>
 
-<Step title="Install the Fern CLI">
+<Step title="Explore the docs">
 
-```bash
-npm install -g fern-api
-```
-
-</Step>
-
-<Step title="Preview locally">
-
-Start a local development server with hot-reloading:
-
-```bash
-fern docs dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) to see your docs.
-
-</Step>
-
-<Step title="Make it yours">
-
-Update `fern.config.json` with your organization name and `docs.yml` with your desired URL. The `version` refers to [the Fern CLI](https://buildwithfern.com/learn/cli-api-reference/cli-reference/overview):
-
-```json title="fern.config.json"
-{
-  "organization": "your-org-name",
-  "version": "0.46.15"
-}
-```
-
-```yaml title="docs.yml"
-instances:
-  - url: your-org.docs.buildwithfern.com
-```
-
-</Step>
-
-<Step title="Publish">
-
-When you're ready to go live:
-
-```bash
-fern generate --docs
-```
+Browse the [API Reference](/api-reference) for detailed endpoint documentation, request/response schemas, and code examples in multiple languages.
 
 </Step>
 </Steps>
 
-## Next steps
-
-Replace the sample Plant Store API with your own OpenAPI specification, update the Markdown pages with your content, and customize the theme to match your brand. For detailed guidance, explore the pages in this documentation or visit the [Fern documentation](https://buildwithfern.com/learn).
+## Learn more
 
 <CardGroup cols={2}>
   <Card
@@ -93,14 +72,14 @@ Replace the sample Plant Store API with your own OpenAPI specification, update t
     icon="duotone pen-to-square"
     href="/editing-your-docs"
   >
-    Learn how to preview and publish changes using the CLI or Fern Editor
+    Preview and publish changes using the CLI or Fern Editor
   </Card>
   <Card
     title="Set up navigation"
     icon="duotone sitemap"
     href="/navigation"
   >
-    Configure tabs, sections, and pages in your docs.yml file
+    Configure tabs, sections, and pages in your docs.yml
   </Card>
   <Card
     title="Customize your docs"
@@ -110,11 +89,10 @@ Replace the sample Plant Store API with your own OpenAPI specification, update t
     Brand your documentation with colors, logos, and layouts
   </Card>
   <Card
-    title="API reference"
-    icon="duotone code"
-    href="/api-reference"
+    title="Get support"
+    icon="duotone headset"
+    href="/support"
   >
-    See how Fern generates interactive API documentation
+    Reach out for help or join the Fern community
   </Card>
 </CardGroup>
-
