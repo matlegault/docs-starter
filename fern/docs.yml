@@ -11,9 +11,10 @@ ai-search:
 title: Fern Docs Starter
 
 layout:
-  searchbar-placement: header
+  searchbar-placement: sidebar
   page-width: full
-  tabs-placement: header
+  content-width: full
+  tabs-placement: sidebar
 
 tabs:
   home:
