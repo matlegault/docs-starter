@@ -1,10 +1,6 @@
 // ─── Configuration ───────────────────────────────────────────────
-var NEBULA_POS = [0.15, 1.2];
+var NEBULA_POS = [0.85, 1.5];
 var FPS = 60;
-
-// Fallback colors if CSS variables aren't available (linear RGB, orange)
-var FALLBACK_C1 = [0.6, 0.131, 0.0];
-var FALLBACK_C2 = [1.0, 0.462, 0.15];
 
 // ─── Color Helpers ──────────────────────────────────────────────
 function srgbToLinear(c) {
@@ -25,20 +21,23 @@ function parseCSSColor(value) {
 
 function getAccentColors() {
   var style = getComputedStyle(document.documentElement);
-  var raw = style.getPropertyValue("--accent-a11").trim()
-         || style.getPropertyValue("--accent-9").trim();
-  var accent = parseCSSColor(raw);
-  if (!accent) return { c1: FALLBACK_C1, c2: FALLBACK_C2 };
 
-  // COLOR_1: accent darkened (deeper nebula core)
-  var c1 = [accent[0] * 0.6, accent[1] * 0.5, accent[2] * 0.3];
-  // COLOR_2: accent brightened with slight warm shift
-  var c2 = [
-    Math.min(1.0, accent[0] + 0.3),
-    Math.min(1.0, accent[1] + 0.2),
-    Math.min(1.0, accent[2] + 0.15)
-  ];
-  return { c1: c1, c2: c2 };
+  // Stop 1: accent-primary token
+  var accent = parseCSSColor(
+    style.getPropertyValue("--accent-a11").trim()
+    || style.getPropertyValue("--accent-9").trim()
+  );
+
+  // Stop 2: dark mode uses black (composited via screen blend), light reads card-background
+  var bg;
+  if (isDarkMode()) {
+    bg = [0.0, 0.0, 0.0];
+  } else {
+    bg = parseCSSColor(style.getPropertyValue("--card-background").trim());
+    if (!bg) bg = [1.0, 1.0, 1.0];
+  }
+
+  return { c1: bg, c2: accent };
 }
 
 // ─── Vertex Shader ──────────────────────────────────────────────
@@ -51,7 +50,7 @@ void main() {
   vUv = aPos * 0.5 + 0.5;
 }`;
 
-// ─── Fragment Shader (faithful Unicorn extraction) ──────────────
+// ─── Fragment Shader ──────────────
 var FRAG = `#version 300 es
 precision highp float;
 precision mediump int;
@@ -107,7 +106,7 @@ vec3 oklab_mix(vec3 lin1, vec3 lin2, float a) {
   vec3 lms1 = safeCbrt(kCONEtoLMS * lin1);
   vec3 lms2 = safeCbrt(kCONEtoLMS * lin2);
   vec3 lms = mix(lms1, lms2, a);
-  lms *= 1.0 + 0.025 * a * (1.0 - a);
+  lms *= 1.0 + 0.02 * a * (1.0 - a);
   return kLMStoCONE * (lms * lms * lms);
 }
 
@@ -161,7 +160,7 @@ float density(vec3 q, float amplitude) {
   return fd;
 }
 
-// ── Grain helpers (from Unicorn grain layer) ──
+// ── Grain helpers ──
 uvec2 pcg2d(uvec2 v) {
   v = v * 1664525u + 1013904223u;
   v.x += v.y * v.y * 1664525u + 1013904223u;
@@ -184,6 +183,10 @@ vec3 grainBlend(vec3 src, vec3 dst) {
     dst.z <= 0.5 ? 2.0 * src.z * dst.z : 1.0 - 2.0 * (1.0 - dst.z) * (1.0 - src.z));
 }
 
+vec3 srgb_from_linear(vec3 lin) {
+  return pow(max(lin, vec3(0.0)), vec3(1.0 / 2.2));
+}
+
 // ── Main ──
 void main() {
   vec2 aspect = vec2(uRes.x / uRes.y, 1.0);
@@ -191,7 +194,7 @@ void main() {
   vec2 pos = uNPos;
 
   vec2 sdfUv = (uv - pos) * aspect;
-  float sdf = getDistance(sdfUv, 2.0);
+  float sdf = getDistance(sdfUv, 2.5);
   float ampSdf = smoothstep(0.1, 0.69 * 1.5, -sdf);
 
   vec3 col = vec3(0.0);
@@ -209,19 +212,23 @@ void main() {
     float t = baseStep * ign * 0.999;
     float wrappedTime = uTime * 0.05;
 
-    vec3 colorCenter = oklab_mix(uC1, uC2, 0.5);
-    vec3 colorDelta  = oklab_mix(uC2, uC1, 0.5);
-    float absorptionFactor = baseStep * mix(-2.0, -6.0, 0.2) * 0.7;
-    float scale = mix(2.0, 8.0, 0.77);
-    float ampBase = mix(0.2, 1.2, 0.94) * 2.0;
+    // Grayscale palette (Unicorn nebula layer originals)
+    vec3 colorCenter = oklab_mix(vec3(0.1608), vec3(0.8157), 0.5);
+    vec3 colorDelta  = oklab_mix(vec3(0.8157), vec3(0.1608), 0.5);
+    float absorptionFactor = baseStep * -6.0;
+    float scale = 8.0;
+    float ampBase = mix(0.2, 1.2, 0.63) * 2.0;
     float amplitude = ampBase;
 
     vec3 q_ro = ro * scale + vec3(0.65, 0.0, 2.66) * wrappedTime;
     vec3 q_rd = rd * scale;
     float accumulatedLight = 0.0;
+    bool hit = false;
+    int emptySteps = 0;
 
     for (int i = 0; i < STEPS; i++) {
       if (transmittance < 0.01 || t > MAX_DIST) break;
+      if (!hit && emptySteps > 20) break;
       if (accumulatedLight > 0.33) break;
 
       vec3 q = q_ro + q_rd * t;
@@ -242,35 +249,48 @@ void main() {
         col += contribution;
         accumulatedLight += abs(dot(contribution, vec3(0.299, 0.587, 0.114)));
         transmittance *= absorption;
+        emptySteps = 0;
+        hit = true;
+      } else {
+        emptySteps++;
       }
 
       t += baseStep;
     }
   }
 
-  // Compositing — faithful to Unicorn pipeline
+  // Compositing
   col *= ampSdf;
   col = Tonemap_ACES(col);
   float ft = mix(1.0, transmittance, ampSdf);
   ft = smoothstep(0.0, 1.0, ft);
-  float alpha = max(0.0, 1.0 - ft);
 
-  // Grain (Unicorn grain layer, blend mode 5 = hard light, mix 0.17)
-  if (alpha > 0.001) {
+  // Composite onto white background 
+  vec3 composite = col + ft;
+
+  // Gradient map: dark areas → accent (uC2), bright areas → background (uC1)
+  float lum = dot(composite, vec3(0.299, 0.587, 0.114));
+  float gmPos = smoothstep(0.0, 1.0, lum);
+  vec3 gmColor = srgb_from_linear(oklab_mix(uC2, uC1, gmPos));
+
+  float nebulaOpacity = max(0.0, 1.0 - ft);
+
+  // Grain 
+  if (nebulaOpacity > 0.001) {
     vec2 st = vUv * uRes;
     float delta = fract(uTime / 20.0);
     vec3 grainRGB = vec3(
       randFibo(st + vec2(1, 2) + delta),
       randFibo(st + vec2(2, 3) + delta),
       randFibo(st + vec2(3, 4) + delta));
-    col = mix(col, grainBlend(grainRGB, col), 0.17);
+    gmColor = mix(gmColor, grainBlend(grainRGB, gmColor), 0.17);
   }
 
-  // Light mode: amplify colors to be visible on white, preserving detail
-  col = mix(col * 6.0, col, uDarkMode);
-  alpha = mix(alpha * 0.5, alpha, uDarkMode);
-
-  O = vec4(col, alpha);
+  // Composite onto card background
+  vec3 cardBg = srgb_from_linear(uC1);
+  float opacity = nebulaOpacity * mix(0.5, 1.0, uDarkMode);
+  vec3 finalColor = mix(cardBg, gmColor, opacity);
+  O = vec4(finalColor, 1.0);
 }`;
 
 // ─── WebGL Setup ─────────────────────────────────────────────────
