@@ -266,9 +266,9 @@ void main() {
     col = mix(col, grainBlend(grainRGB, col), 0.17);
   }
 
-  // Light mode: keep warm tones visible on white background
-  col = mix(col * 1.5, col, uDarkMode);
-  alpha = mix(alpha * 0.6, alpha, uDarkMode);
+  // Light mode: amplify colors to be visible on white, preserving detail
+  col = mix(col * 6.0, col, uDarkMode);
+  alpha = mix(alpha * 0.5, alpha, uDarkMode);
 
   O = vec4(col, alpha);
 }`;
