@@ -384,8 +384,21 @@ function isDarkMode() {
     renderer.gl.uniform3fv(renderer.uC2, colors.c2);
   }
 
+  function removeScene() {
+    var existing = document.querySelector(".background-graphic-wrapper");
+    if (existing) {
+      existing.remove();
+      if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
+      renderer = null;
+      wrapper = null;
+    }
+  }
+
   function injectScene() {
-    if (!window.location.pathname.match(/\/(welcome)?\s*$/)) return;
+    // Only activate on pages that have the nebula-anchor marker
+    var marker = document.querySelector(".nebula-anchor");
+    if (!marker) { removeScene(); return; }
+
     var cw = document.querySelector(".canvas-wrapper");
     if (!cw || cw.querySelector(".background-graphic-wrapper")) return;
 

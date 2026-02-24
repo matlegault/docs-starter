@@ -30,12 +30,6 @@
   height: 100% !important;
 }
 
-/* Page content above the WebGL background */
-.canvas-wrapper > *:not(.background-graphic-wrapper) {
-  position: relative;
-  z-index: 1;
-}
-
 /* Welcome page hero spacing */
 .canvas-wrapper:has(.welcome-subheading) {
   padding-top: 160px;
