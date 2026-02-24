@@ -17,8 +17,11 @@ layout:
 
 tabs:
   home:
-    display-name: Docs
+    display-name: Home
     icon: home
+  docs:
+    display-name: Docs
+    icon: book
   API Reference:
     display-name: API Reference
     icon: puzzle
@@ -26,11 +29,13 @@ tabs:
 navigation:
   - tab: home
     layout:
+      - page: Welcome
+        path: docs/pages/welcome.mdx
+        slug: welcome
+  - tab: docs
+    layout:
       - section: Get started
         contents:
-          - page: Welcome
-            path: docs/pages/welcome.mdx
-            icon: fa-duotone fa-house
           - page: Edit your docs
             path: docs/pages/editing-your-docs.mdx
             icon: fa-duotone fa-pen-to-square
