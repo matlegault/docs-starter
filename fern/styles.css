@@ -9,4 +9,42 @@
 
 .canvas-wrapper {
   margin-top: 2px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* WebGL background — injected as direct child of canvas-wrapper */
+.background-graphic-wrapper {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 0;
+  /* mix-blend-mode set dynamically by custom.js (screen/multiply) */
+}
+
+.background-graphic-wrapper canvas {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Welcome page hero spacing */
+.canvas-wrapper:has(.welcome-subheading) {
+  padding-top: 160px;
+}
+
+.welcome-subheading {
+  margin-bottom: 160px;
+}
+
+.canvas-wrapper:has(.welcome-subheading) .fern-breadcrumb {
+  display: none;
+}
+
+.canvas-wrapper:has(.welcome-subheading) h1 {
+  font-size: 3rem;
+  line-height: 1.1;
 }

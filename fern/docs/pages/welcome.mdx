@@ -1,98 +1,102 @@
 ---
-title: Plant Store API
-subtitle: The easiest way to manage your plant inventory, orders, and customers
+title: Build powerful plant commerce experiences.
 slug: welcome
+hide-page-actions: true
 ---
 
-Build powerful plant commerce experiences with the Plant Store API. Whether you're building a storefront, managing inventory, or handling customer accounts — our RESTful API has you covered.
+<div className="welcome-subheading">
+  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flexStart', width: '100%' }}>
+    <div style={{ alignSelf: 'stretch', width: '2px', background: 'var(--accent-a11)', marginRight: '20px', marginTop: '6px', marginBottom: '6px', flexShrink: 0 }} />
+    <p style={{ lineHeight: '24px', zIndex: 1, position: 'relative', margin: '0px' }}>
+      The Plant Store API gives you everything you need to manage your plant catalog, process orders, and handle customer accounts. Build your storefront with a robust, RESTful API — complete with SDKs and interactive docs.
+    </p>
+  </div>
+</div>
 
-## What you can do
+### Try the API
 
-<CardGroup cols={2}>
+<CodeBlocks>
+  ```python title="Python"
+  from plantstore import PlantStore
+
+  with PlantStore("<apiKey>") as client:
+      plant = client.plants.get(plant_id=1)
+
+      print(f"{plant.name}")
+      print(f"  Status: {plant.status}")
+      print(f"  Tags: {', '.join(plant.tags)}")
+  ```
+  ```bash title="cURL"
+  curl -X GET "https://api.plantstore.dev/v3/plant/1" \
+    -H "api_key: YOUR_API_KEY"
+  ```
+  ```javascript title="Node.js"
+  import { PlantStoreClient } from "@plantstore/sdk";
+
+  const client = new PlantStoreClient({ apiKey: "<apiKey>" });
+
+  const plant = await client.plants.get({ plantId: 1 });
+
+  console.log(plant.name);
+  console.log(`  Status: ${plant.status}`);
+  console.log(`  Tags: ${plant.tags.join(", ")}`);
+  ```
+</CodeBlocks>
+
+### Use cases
+
+<CardGroup cols={3}>
   <Card
-    title="Browse & manage plants"
+    title="Plant catalog"
     icon="duotone leaf"
     href="/api-reference/plant/get-plant-by-id"
   >
-    Add, update, and search your full plant catalog with rich metadata like status, tags, and photos.
+    Browse, search, and manage your full plant inventory with rich metadata, tags, and photos.
   </Card>
   <Card
-    title="Process orders"
+    title="Order management"
     icon="duotone cart-shopping"
     href="/api-reference/plant/add-plant"
   >
-    Place orders, track inventory quantities, and manage your storefront with ease.
+    Process orders, track quantities, and manage your storefront checkout flow.
   </Card>
   <Card
-    title="Manage users"
-    icon="duotone users"
-    href="/api-reference/user/create-user"
-  >
-    Create and manage customer accounts, handle authentication, and control access.
-  </Card>
-  <Card
-    title="Try it live"
-    icon="duotone terminal"
+    title="SDKs & tools"
+    icon="duotone cube"
     href="/api-reference"
   >
-    Use the interactive API Explorer to test endpoints directly from the docs.
+    Get SDKs for Python, Node.js, and more — plus an interactive API explorer.
   </Card>
 </CardGroup>
 
-## Get started
+### Popular endpoints
 
-<Steps>
-<Step title="Get your API key">
-
-Sign up at [plantstore.dev](https://plantstore.dev) and grab your API key from the dashboard.
-
-</Step>
-
-<Step title="Make your first request">
-
-```bash
-curl -X GET "https://api.plantstore.dev/v3/plant/1" \
-  -H "api_key: YOUR_API_KEY"
-```
-
-</Step>
-
-<Step title="Explore the docs">
-
-Browse the [API Reference](/api-reference) for detailed endpoint documentation, request/response schemas, and code examples in multiple languages.
-
-</Step>
-</Steps>
-
-## Learn more
-
-<CardGroup cols={2}>
+<CardGroup cols={3}>
   <Card
-    title="Edit your docs"
-    icon="duotone pen-to-square"
-    href="/editing-your-docs"
+    title="Get plant"
+    icon="duotone magnifying-glass"
+    href="/api-reference/plant/get-plant-by-id"
   >
-    Preview and publish changes using the CLI or Fern Editor
+    Retrieve full plant details including status, photos, and availability.
   </Card>
   <Card
-    title="Set up navigation"
-    icon="duotone sitemap"
-    href="/navigation"
+    title="Add plant"
+    icon="duotone plus"
+    href="/api-reference/plant/add-plant"
   >
-    Configure tabs, sections, and pages in your docs.yml
+    Add new plants to your catalog with metadata, categories, and tags.
   </Card>
   <Card
-    title="Customize your docs"
-    icon="duotone palette"
-    href="/customization"
+    title="Create user"
+    icon="duotone user-plus"
+    href="/api-reference/user/create-user"
   >
-    Brand your documentation with colors, logos, and layouts
-  </Card>
-  <Card
-    title="Get support"
-    icon="duotone headset"
-    href="/support"
-  >
-    Reach out for help or join the Fern community
+    Register new customers with profiles, preferences, and access control.
   </Card>
 </CardGroup>
+
+---
+
+### Questions and feedback
+
+If you have any questions or feedback, refer to the **Support** section in the sidebar, where you'll find helpful resources.

@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(mkdir:*)"
+      "Bash(mkdir:*)",
+      "mcp__claude_ai_Fern__ask_fern_ai"
     ],
     "deny": [],
     "ask": []
