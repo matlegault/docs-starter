@@ -8,3 +8,22 @@
 :root.dark .fern-background-image {
   background-image: linear-gradient(180deg, rgba(112, 225, 85, 0.03) 0%, transparent 50%);
 }
+
+
+/* Welcome page hero spacing */
+.canvas-wrapper:has(.welcome-subheading) {
+  padding-top: 160px;
+}
+
+.welcome-subheading {
+  margin-bottom: 160px;
+}
+
+.canvas-wrapper:has(.welcome-subheading) .fern-breadcrumb {
+  display: none;
+}
+
+.canvas-wrapper:has(.welcome-subheading) h1 {
+  font-size: 3rem;
+  line-height: 1.1;
+}
