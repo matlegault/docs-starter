@@ -2,7 +2,7 @@
 
 /* Subtle linear gradient background */
 .fern-background-image {
-  background-image: linear-gradient(180deg, color-mix(in srgb, var(--accent) 3%, transparent) 0%, transparent 50%);
+  background-image: linear-gradient(180deg, color-mix(in srgb, var(--accent) 15%, transparent) 0%, transparent 50%);
 }
 
 /* ── Welcome page styling ── */
@@ -12,6 +12,48 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
+  /* isolation: isolate; */
+  /* background: var(--background); */
   -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 85%);
   mask-image: linear-gradient(to bottom, black 40%, transparent 85%);
 }
+
+#unicorn-embed::before {
+  content: "";
+  position: absolute;
+  top: -10%;
+  left: 50%;
+  translate: -50% 0;
+  width: 60%;
+  height: 50%;
+  background: radial-gradient(ellipse at center, var(--accent), transparent 70%);
+  filter: blur(80px);
+  mix-blend-mode: screen;
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 1;
+}
+
+:root.dark #unicorn-embed::before {
+  background: radial-gradient(ellipse at center, var(--accent), transparent 70%);
+}
+
+:root.light #unicorn-embed::before {
+  background: radial-gradient(ellipse at center, var(--accent-2), transparent 70%);
+}
+
+
+#unicorn-embed canvas {
+  position: relative;
+  z-index: 0;
+  filter: url(#accent-colorize);
+}
+
+:root.light #unicorn-embed canvas {
+  opacity: 1;
+}
+
+:root.dark #unicorn-embed canvas {
+  opacity: 0.8;
+}
+
