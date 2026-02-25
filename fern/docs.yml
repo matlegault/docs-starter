@@ -98,3 +98,4 @@ logo:
 favicon: docs/assets/favicon.svg
 
 css: styles.css
+js: blob-animation.js
