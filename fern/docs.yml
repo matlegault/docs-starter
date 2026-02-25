@@ -29,7 +29,7 @@ tabs:
 navigation:
   - tab: home
     layout:
-      - page: Welcome
+      - page: Home
         path: docs/pages/welcome.mdx
         slug: welcome
   - tab: docs
@@ -84,8 +84,8 @@ navbar-links:
       
 colors:
   accent-primary:
-    dark: "#70E155"
-    light: "#008700"
+    dark: "#5B8DEF"
+    light: "#1A56DB"
   background:
     dark: "#111113"
     light: "#FFFFFF"

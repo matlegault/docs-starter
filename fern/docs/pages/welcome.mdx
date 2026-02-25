@@ -1,11 +1,25 @@
 ---
-title: Plant Store API
-subtitle: The easiest way to manage your plant inventory, orders, and customers
 slug: welcome
 layout: overview
+hide-page-actions: true
 ---
 
-<div className="nebula-anchor" />
+<style>{`
+  .fern-page-heading, .fern-page-heading-wrapper, header.my-8 { display: none; }
+  .unicorn-anchor .fern-card {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    background-color: rgba(255, 255, 255, 0.05);
+    text-align: left;
+  }
+  .unicorn-anchor .fern-card .font-semibold {
+    font-size: 1.25rem;
+  }
+`}</style>
+
+<div className="unicorn-anchor" style={{ textAlign: 'center' }}>
+  <h1 style={{ fontSize: '5rem', lineHeight: 1.1, marginBottom: '12px' }}>Plant Store API</h1>
+  <p style={{ fontSize: '1.5rem', opacity: 0.7, marginBottom: '80px' }}>The easiest way to manage your plant inventory, orders, and customers</p>
 
 <CardGroup cols={2}>
   <Card
@@ -37,3 +51,5 @@ layout: overview
 ## Need Help?
 
 If you need additional support beyond what's covered in these documents, please reach out to our support team for assistance by chatting with us on our [Support Site](/support).
+
+</div>

@@ -2,9 +2,16 @@
 
 /* Subtle linear gradient background */
 .fern-background-image {
-  background-image: linear-gradient(180deg, rgba(0, 135, 0, 0.03) 0%, transparent 50%);
+  background-image: linear-gradient(180deg, color-mix(in srgb, var(--accent) 3%, transparent) 0%, transparent 50%);
 }
 
-:root.dark .fern-background-image {
-  background-image: linear-gradient(180deg, rgba(112, 225, 85, 0.03) 0%, transparent 50%);
+/* ── Welcome page styling ── */
+
+/* UnicornStudio canvas inside Fern's background container */
+#unicorn-embed {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 85%);
+  mask-image: linear-gradient(to bottom, black 40%, transparent 85%);
 }

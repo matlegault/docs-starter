@@ -1,446 +1,111 @@
-// ─── Configuration ───────────────────────────────────────────────
-var NEBULA_POS = [0.85, 1.5];
-var FPS = 60;
+// ─── UnicornStudio Integration ──────────────────────────────────
+// Scene data is embedded inline because Fern rewrites asset paths
+// to opaque S3/CDN URLs that custom JS cannot reference directly.
+var US_SCENE_DATA = {"history":[{"breakpoints":[],"visible":true,"aspectRatio":1,"userDownsample":0.25,"layerType":"effect","type":"gradient","usesPingPong":false,"speed":0.25,"trackMouse":0,"trackAxes":"xy","mouseMomentum":0,"texture":false,"animating":false,"isMask":0,"compiledFragmentShaders":["#version 300 es\nprecision highp float;in vec2 vTextureCoord;uniform vec2 uMousePos;const float PI = 3.14159265;vec2 rotate(vec2 coord, float angle) {\nfloat s = sin(angle);\nfloat c = cos(angle);\nreturn vec2(\ncoord.x * c - coord.y * s,\ncoord.x * s + coord.y * c\n);\n}out vec4 fragColor;vec3 getBgColor(vec2 uv) {return vec3(0.09803921568627451, 0.08235294117647059, 0.30196078431372547);\n}void main() {vec2 uv = vTextureCoord;\nvec2 pos = vec2(0.5, 0.5) + mix(vec2(0), (uMousePos-0.5), 0.0000);\nuv -= pos;\nuv /= max(0.5000*2., 1e-5);\nuv = rotate(uv, (0.0000 - 0.5) * 2. * PI);\nvec4 color = vec4(getBgColor(uv), 1.0000);\nfragColor = color;\n}"],"compiledVertexShaders":["#version 300 es\nprecision mediump float;in vec3 aVertexPosition;\nin vec2 aTextureCoord;uniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;out vec2 vTextureCoord;\nout vec3 vVertexPosition;void main() {\ngl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);\nvTextureCoord = aTextureCoord;\n}"],"data":{"downSample":0.5,"depth":false,"uniforms":{},"isBackground":true},"id":"gradient"},{"breakpoints":[],"visible":true,"aspectRatio":1,"userDownsample":0.25,"layerType":"effect","type":"circle","usesPingPong":false,"trackMouse":0,"trackAxes":"xy","mouseMomentum":0,"texture":false,"animating":false,"isMask":0,"compiledFragmentShaders":["#version 300 es\nprecision highp float;\nin vec3 vVertexPosition;\nin vec2 vTextureCoord;\nuniform sampler2D uTexture;\nuniform vec2 uResolution;\nvec3 blend (int blendMode, vec3 src, vec3 dst) {\nreturn src + dst;\n}out vec4 fragColor;mat2 rot(float a) {\nreturn mat2(cos(a),-sin(a),sin(a),cos(a));\n}float luma(vec3 color) {\nreturn dot(color, vec3(0.299, 0.587, 0.114));\n}\nvoid main() {\nvec2 uv = vTextureCoord;\nvec4 bg = texture(uTexture, uv);\nfloat lum = luma(bg.rgb);\nfloat displacement = (lum - 0.5) * 0.0000 * 0.5;\nvec2 aspectRatio = vec2(uResolution.x/uResolution.y, 1.0);\nvec2 skew = vec2(max(0.3000, 0.001), max(1.0 - 0.3000, 0.001));\nfloat halfRadius = 0.8600 * 0.5;\nfloat falloffAmount = max(1.5000, 0.001);\nfloat innerEdge = halfRadius - falloffAmount * halfRadius * 0.5;\nfloat outerEdge = halfRadius + falloffAmount * halfRadius * 0.5;\nvec2 pos = vec2(0.5204640476234333, 1.245195657894087);\nconst float TWO_PI = 6.28318530718;\nvec2 scaledUV = uv * aspectRatio * rot(0.0054 * TWO_PI) * skew;\nvec2 scaledPos = pos * aspectRatio * rot(0.0054 * TWO_PI) * skew;\nfloat radius = distance(scaledUV, scaledPos);\nfloat falloff = smoothstep(innerEdge + displacement, outerEdge + displacement, radius);\nfalloff = (1.0 - falloff) * 0.9200;\nvec3 circle = vec3(0.9294117647058824, 0.8784313725490196, 1) * falloff;vec3 blended = blend(1, vec3(0.9294117647058824, 0.8784313725490196, 1), bg.rgb);\ncircle = mix(bg.rgb, blended, falloff);\nvec4 color = vec4(circle, max(bg.a, falloff));\nfragColor = color;}"],"compiledVertexShaders":["#version 300 es\nprecision mediump float;in vec3 aVertexPosition;\nin vec2 aTextureCoord;uniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\nuniform mat4 uTextureMatrix;out vec2 vTextureCoord;\nout vec3 vVertexPosition;void main() {\ngl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);\nvTextureCoord = (uTextureMatrix * vec4(aTextureCoord, 0.0, 1.0)).xy;\n}"],"data":{"depth":false,"uniforms":{},"isBackground":false},"id":"circle"},{"breakpoints":[],"visible":true,"aspectRatio":1,"userDownsample":0.25,"states":{"appear":[{"local":{"pendingChanges":{},"changeDebouncer":null,"dragSession":null},"type":"appear","id":"81f2e16a-6ed7-45bb-8143-69b18a8ea9d7","prop":"speed","transition":{"delay":5725,"duration":500,"ease":"easeInOutQuart"},"complete":false,"progress":0,"value":0,"endValue":0.25,"initialized":false,"breakpoints":[],"loop":"none","loopDelay":0}],"scroll":[],"hover":[],"mousemove":[]},"layerType":"effect","type":"beam","usesPingPong":false,"speed":0,"trackMouse":0,"trackAxes":"xy","mouseMomentum":0,"texture":false,"parentLayer":"eaea639b-61e9-4e29-9bc4-3aa2380e2397","animating":true,"isMask":0,"compiledFragmentShaders":["#version 300 es\nprecision highp float;\nprecision highp int;in vec2 vTextureCoord;uniform sampler2D uTexture;uniform float uTime;uniform vec2 uMousePos;\nuniform vec2 uResolution;\nvec3 blend (int blendMode, vec3 src, vec3 dst) {\nreturn src + dst;\n}uvec2 pcg2d(uvec2 v) {\nv = v * 1664525u + 1013904223u;\nv.x += v.y * v.y * 1664525u + 1013904223u;\nv.y += v.x * v.x * 1664525u + 1013904223u;\nv ^= v >> 16;\nv.x += v.y * v.y * 1664525u + 1013904223u;\nv.y += v.x * v.x * 1664525u + 1013904223u;\nreturn v;\n}float randFibo(vec2 p) {\nuvec2 v = floatBitsToUint(p);\nv = pcg2d(v);\nuint r = v.x ^ v.y;\nreturn float(r) / float(0xffffffffu);\n}const float TAU = 6.28318530718;vec3 Tonemap_tanh(vec3 x) {\nx = clamp(x, -40.0, 40.0);\nreturn (exp(x) - exp(-x)) / (exp(x) + exp(-x));\n}out vec4 fragColor;const float PI = 3.14159265359;\nconst float TWO_PI = 2.0 * PI;mat2 rot(float a) {\nreturn mat2(cos(a),-sin(a),sin(a),cos(a));\n}vec3 pal( in float t, in vec3 a, in vec3 b, in vec3 c, in vec3 d ) {\nreturn a + b*cos( TAU*(c*t+d) );\n}float drawExpandingRings(vec2 uv, vec2 center, float scale, float angle) {\nuv.x *= uResolution.x/uResolution.y;\ncenter.x *= uResolution.x/uResolution.y;\nvec2 skew = vec2(0.5000, 1. - 0.5000) * 2.;\nuv = uv * rot(0.0000 * TWO_PI) * skew;\ncenter = center * rot(0.0000 * TWO_PI) * skew;\nfloat modulo = fract(uTime * 0.02 + 0.0000);\nfloat ringRadius = scale * 0.5 * modulo;\nfloat distFromCenter = length(uv - center);\nfloat ringDist = abs(distFromCenter - ringRadius);\nfloat lineRadius = 1.1800 * modulo;\nfloat brightness = lineRadius / max(0.0001, 1.0 - smoothstep(0.2, 0.002, ringDist + 0.02));brightness = brightness * max(0., 1.-modulo);return brightness * pow(1.-ringDist, 3.);\n}float getBeam(vec2 uv) {\nvec2 pos = vec2(0.5, 0.5) + mix(vec2(0), (uMousePos-0.5), 0.0000);\nreturn drawExpandingRings(uv, pos, 1.0900, 0.0000);\n}void main() {\nvec2 uv = vTextureCoord;\nvec4 bg = texture(uTexture, uv);float beam = getBeam(uv);\nfloat ssBeam = smoothstep(0.0, 1.0, beam);\nfloat chroma = 0.4;vec3 beamColor = pal(beam,\n(vec3(0.8156862745098039, 0.8156862745098039, 0.8156862745098039) + vec3(0.5)) * 0.5,\nvec3(0.5) - vec3(0.8156862745098039, 0.8156862745098039, 0.8156862745098039),\nvec3(1.0 - chroma, 1.0, 1. + chroma),\nvec3(chroma, 0., -chroma)\n);beamColor = mix(beamColor, vec3(0.8156862745098039, 0.8156862745098039, 0.8156862745098039), mix(1.0, ssBeam, 0.0000)) * beam;\nfloat dither = (randFibo(gl_FragCoord.xy) - 0.5) / 255.0;vec3 blended = blend(1, Tonemap_tanh(beamColor), bg.rgb);\nvec3 result = mix(bg.rgb, blended, 1.0000);\nresult += dither;vec4 color = vec4(result, max(bg.a, beam));\nfragColor = color;}"],"compiledVertexShaders":["#version 300 es\nprecision mediump float;in vec3 aVertexPosition;\nin vec2 aTextureCoord;uniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\nuniform mat4 uTextureMatrix;out vec2 vTextureCoord;\nout vec3 vVertexPosition;void main() {\ngl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);\nvTextureCoord = (uTextureMatrix * vec4(aTextureCoord, 0.0, 1.0)).xy;\n}"],"data":{"depth":false,"uniforms":{},"isBackground":false},"id":"beam"},{"breakpoints":[],"visible":true,"aspectRatio":1,"userDownsample":0.5,"layerType":"effect","type":"zoomBlur","usesPingPong":false,"trackMouse":0,"trackAxes":"xy","mouseMomentum":0,"texture":false,"parentLayer":"e5da321d-1105-4d8f-af76-68017d532073","animating":false,"isMask":0,"compiledFragmentShaders":["#version 300 es\nprecision highp float;in vec2 vTextureCoord;uniform sampler2D uTexture;\nuniform vec2 uMousePos;\nuniform vec2 uResolution;\nfloat ease (int easingFunc, float t) {\nreturn t;\n}\nuvec2 pcg2d(uvec2 v) {\nv = v * 1664525u + 1013904223u;\nv.x += v.y * v.y * 1664525u + 1013904223u;\nv.y += v.x * v.x * 1664525u + 1013904223u;\nv ^= v >> 16;\nv.x += v.y * v.y * 1664525u + 1013904223u;\nv.y += v.x * v.x * 1664525u + 1013904223u;\nreturn v;\n}float randFibo(vec2 p) {\nuvec2 v = floatBitsToUint(p);\nv = pcg2d(v);\nuint r = v.x ^ v.y;\nreturn float(r) / float(0xffffffffu);\n}out vec4 fragColor;\nfloat getExponentialWeight(int index) {\nswitch(index) {\ncase 0: return 1.0000000000;\ncase 1: return 0.7165313106;\ncase 2: return 0.5134171190;\ncase 3: return 0.3678794412;\ncase 4: return 0.2636050919;\ncase 5: return 0.1888756057;\ncase 6: return 0.1353352832;\ncase 7: return 0.0969670595;\ncase 8: return 0.0694877157;\ndefault: return 0.0;\n}\n}vec4 RadialBlur(sampler2D tex, vec2 uv) {\nif (0.9440 == 0.0) {\nreturn texture(tex, uv);\n}\nvec2 pos = vec2(0.5, 0.5) + mix(vec2(0), (uMousePos-0.5), 0.0000);\nfloat aspectRatio = uResolution.x/uResolution.y;\nvec2 dir = uv - pos;\ndir.x *= aspectRatio;\nfloat dist = distance(uv * vec2(aspectRatio, 1), pos * vec2(aspectRatio, 1));\ndist = ease(0, max(0.,1.-dist * 4. * (1. - 1.0000)));\nif (0 == 1) {\ndist = max(0., (0.5 - dist));\n}float amount = (0.9440 + 0.2) * dist * 0.01;\nif(0 == 1) amount *= 0.5;\nif(0 == 2) amount *= 0.25;\nif (amount < 0.0001) {\nreturn texture(tex, uv);\n}\nvec4 color = vec4(0.0);\nfloat total_weight = 0.0;\nvec4 center = texture(tex, uv);\nfloat center_weight = getExponentialWeight(0);\ncolor += center * center_weight;\ntotal_weight += center_weight;\nvec2 normalizedDir = normalize(dir);\nnormalizedDir.x /= aspectRatio;\nfor (int i = 1; i <= 8; i++) {\nfloat weight = getExponentialWeight(i);\nfloat offset = float(i) * amount;\nvec2 sampleDir = normalizedDir * offset;\nvec4 sample1 = texture(tex, uv + sampleDir);\nvec4 sample2 = texture(tex, uv - sampleDir);\ncolor += (sample1 + sample2) * weight;\ntotal_weight += 2.0 * weight;\n}color = color / total_weight;\nif(0 == 3) {\nfloat dither = (randFibo(gl_FragCoord.xy) - 0.5) / 255.0;\ncolor.rgb += dither;\n}\nreturn color;\n}vec4 radialBlurPass(vec2 uv) {return RadialBlur(uTexture, uv);\n}vec4 getPassColor(vec2 uv) {\nreturn radialBlurPass(uv);\n}\nvoid main() {\nvec2 uv = vTextureCoord;\nvec4 color = getPassColor(uv);\nfragColor = color;}","#version 300 es\nprecision highp float;in vec2 vTextureCoord;uniform sampler2D uTexture;\nuniform vec2 uMousePos;\nuniform vec2 uResolution;\nfloat ease (int easingFunc, float t) {\nreturn t;\n}\nuvec2 pcg2d(uvec2 v) {\nv = v * 1664525u + 1013904223u;\nv.x += v.y * v.y * 1664525u + 1013904223u;\nv.y += v.x * v.x * 1664525u + 1013904223u;\nv ^= v >> 16;\nv.x += v.y * v.y * 1664525u + 1013904223u;\nv.y += v.x * v.x * 1664525u + 1013904223u;\nreturn v;\n}float randFibo(vec2 p) {\nuvec2 v = floatBitsToUint(p);\nv = pcg2d(v);\nuint r = v.x ^ v.y;\nreturn float(r) / float(0xffffffffu);\n}out vec4 fragColor;\nfloat getExponentialWeight(int index) {\nswitch(index) {\ncase 0: return 1.0000000000;\ncase 1: return 0.7165313106;\ncase 2: return 0.5134171190;\ncase 3: return 0.3678794412;\ncase 4: return 0.2636050919;\ncase 5: return 0.1888756057;\ncase 6: return 0.1353352832;\ncase 7: return 0.0969670595;\ncase 8: return 0.0694877157;\ndefault: return 0.0;\n}\n}vec4 RadialBlur(sampler2D tex, vec2 uv) {\nif (0.9440 == 0.0) {\nreturn texture(tex, uv);\n}\nvec2 pos = vec2(0.5, 0.5) + mix(vec2(0), (uMousePos-0.5), 0.0000);\nfloat aspectRatio = uResolution.x/uResolution.y;\nvec2 dir = uv - pos;\ndir.x *= aspectRatio;\nfloat dist = distance(uv * vec2(aspectRatio, 1), pos * vec2(aspectRatio, 1));\ndist = ease(0, max(0.,1.-dist * 4. * (1. - 1.0000)));\nif (0 == 1) {\ndist = max(0., (0.5 - dist));\n}float amount = (0.9440 + 0.2) * dist * 0.01;\nif(1 == 1) amount *= 0.5;\nif(1 == 2) amount *= 0.25;\nif (amount < 0.0001) {\nreturn texture(tex, uv);\n}\nvec4 color = vec4(0.0);\nfloat total_weight = 0.0;\nvec4 center = texture(tex, uv);\nfloat center_weight = getExponentialWeight(0);\ncolor += center * center_weight;\ntotal_weight += center_weight;\nvec2 normalizedDir = normalize(dir);\nnormalizedDir.x /= aspectRatio;\nfor (int i = 1; i <= 8; i++) {\nfloat weight = getExponentialWeight(i);\nfloat offset = float(i) * amount;\nvec2 sampleDir = normalizedDir * offset;\nvec4 sample1 = texture(tex, uv + sampleDir);\nvec4 sample2 = texture(tex, uv - sampleDir);\ncolor += (sample1 + sample2) * weight;\ntotal_weight += 2.0 * weight;\n}color = color / total_weight;\nif(1 == 3) {\nfloat dither = (randFibo(gl_FragCoord.xy) - 0.5) / 255.0;\ncolor.rgb += dither;\n}\nreturn color;\n}vec4 radialBlurPass(vec2 uv) {return RadialBlur(uTexture, uv);\n}vec4 getPassColor(vec2 uv) {\nreturn radialBlurPass(uv);\n}\nvoid main() {\nvec2 uv = vTextureCoord;\nvec4 color = getPassColor(uv);\nfragColor = color;}","#version 300 es\nprecision highp float;in vec2 vTextureCoord;uniform sampler2D uTexture;\nuniform vec2 uMousePos;\nuniform vec2 uResolution;\nfloat ease (int easingFunc, float t) {\nreturn t;\n}\nuvec2 pcg2d(uvec2 v) {\nv = v * 1664525u + 1013904223u;\nv.x += v.y * v.y * 1664525u + 1013904223u;\nv.y += v.x * v.x * 1664525u + 1013904223u;\nv ^= v >> 16;\nv.x += v.y * v.y * 1664525u + 1013904223u;\nv.y += v.x * v.x * 1664525u + 1013904223u;\nreturn v;\n}float randFibo(vec2 p) {\nuvec2 v = floatBitsToUint(p);\nv = pcg2d(v);\nuint r = v.x ^ v.y;\nreturn float(r) / float(0xffffffffu);\n}out vec4 fragColor;\nfloat getExponentialWeight(int index) {\nswitch(index) {\ncase 0: return 1.0000000000;\ncase 1: return 0.7165313106;\ncase 2: return 0.5134171190;\ncase 3: return 0.3678794412;\ncase 4: return 0.2636050919;\ncase 5: return 0.1888756057;\ncase 6: return 0.1353352832;\ncase 7: return 0.0969670595;\ncase 8: return 0.0694877157;\ndefault: return 0.0;\n}\n}vec4 RadialBlur(sampler2D tex, vec2 uv) {\nif (0.9440 == 0.0) {\nreturn texture(tex, uv);\n}\nvec2 pos = vec2(0.5, 0.5) + mix(vec2(0), (uMousePos-0.5), 0.0000);\nfloat aspectRatio = uResolution.x/uResolution.y;\nvec2 dir = uv - pos;\ndir.x *= aspectRatio;\nfloat dist = distance(uv * vec2(aspectRatio, 1), pos * vec2(aspectRatio, 1));\ndist = ease(0, max(0.,1.-dist * 4. * (1. - 1.0000)));\nif (0 == 1) {\ndist = max(0., (0.5 - dist));\n}float amount = (0.9440 + 0.2) * dist * 0.01;\nif(2 == 1) amount *= 0.5;\nif(2 == 2) amount *= 0.25;\nif (amount < 0.0001) {\nreturn texture(tex, uv);\n}\nvec4 color = vec4(0.0);\nfloat total_weight = 0.0;\nvec4 center = texture(tex, uv);\nfloat center_weight = getExponentialWeight(0);\ncolor += center * center_weight;\ntotal_weight += center_weight;\nvec2 normalizedDir = normalize(dir);\nnormalizedDir.x /= aspectRatio;\nfor (int i = 1; i <= 8; i++) {\nfloat weight = getExponentialWeight(i);\nfloat offset = float(i) * amount;\nvec2 sampleDir = normalizedDir * offset;\nvec4 sample1 = texture(tex, uv + sampleDir);\nvec4 sample2 = texture(tex, uv - sampleDir);\ncolor += (sample1 + sample2) * weight;\ntotal_weight += 2.0 * weight;\n}color = color / total_weight;\nif(2 == 3) {\nfloat dither = (randFibo(gl_FragCoord.xy) - 0.5) / 255.0;\ncolor.rgb += dither;\n}\nreturn color;\n}vec4 radialBlurPass(vec2 uv) {return RadialBlur(uTexture, uv);\n}vec4 getPassColor(vec2 uv) {\nreturn radialBlurPass(uv);\n}\nvoid main() {\nvec2 uv = vTextureCoord;\nvec4 color = getPassColor(uv);\nfragColor = color;}","#version 300 es\nprecision highp float;in vec2 vTextureCoord;uniform sampler2D uTexture;\nuniform sampler2D uBgTexture;\nuniform vec2 uMousePos;\nuniform vec2 uResolution;\nfloat ease (int easingFunc, float t) {\nreturn t;\n}out vec4 fragColor;vec4 finalPass(vec2 uv) {\nif (0.9440 == 0.00) {\nreturn texture(uBgTexture, uv);\n}\nvec4 blurredColor = texture(uTexture, uv);\nvec4 originalColor = texture(uBgTexture, uv);\nvec2 pos = vec2(0.5, 0.5) + mix(vec2(0), (uMousePos-0.5), 0.0000);\nfloat aspectRatio = uResolution.x/uResolution.y;\nfloat dist = ease(0, max(0.,1.-distance(uv * vec2(aspectRatio, 1), pos * vec2(aspectRatio, 1)) * 4. * (1. - 1.0000)));\nif (0 == 1) {\ndist = max(0., (0.5 - dist));\n}return mix(originalColor, blurredColor, (0.9440 * dist > 0.001) ? 1.0 : 0.0);\n}vec4 getPassColor(vec2 uv) {\nreturn finalPass(uv);\n}\nvoid main() {\nvec2 uv = vTextureCoord;\nvec4 color = getPassColor(uv);\nfragColor = color;}"],"compiledVertexShaders":["#version 300 es\nprecision mediump float;in vec3 aVertexPosition;\nin vec2 aTextureCoord;uniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\nuniform mat4 uTextureMatrix;out vec2 vTextureCoord;\nout vec3 vVertexPosition;void main() {\ngl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);\nvTextureCoord = (uTextureMatrix * vec4(aTextureCoord, 0.0, 1.0)).xy;\n}","#version 300 es\nprecision mediump float;in vec3 aVertexPosition;\nin vec2 aTextureCoord;uniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\nuniform mat4 uTextureMatrix;out vec2 vTextureCoord;\nout vec3 vVertexPosition;void main() {\ngl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);\nvTextureCoord = (uTextureMatrix * vec4(aTextureCoord, 0.0, 1.0)).xy;\n}","#version 300 es\nprecision mediump float;in vec3 aVertexPosition;\nin vec2 aTextureCoord;uniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\nuniform mat4 uTextureMatrix;out vec2 vTextureCoord;\nout vec3 vVertexPosition;void main() {\ngl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);\nvTextureCoord = (uTextureMatrix * vec4(aTextureCoord, 0.0, 1.0)).xy;\n}","#version 300 es\nprecision mediump float;in vec3 aVertexPosition;\nin vec2 aTextureCoord;uniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\nuniform mat4 uTextureMatrix;out vec2 vTextureCoord;\nout vec3 vVertexPosition;void main() {\ngl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);\nvTextureCoord = (uTextureMatrix * vec4(aTextureCoord, 0.0, 1.0)).xy;\n}"],"data":{"downSample":0.5,"depth":false,"uniforms":{},"isBackground":false,"passes":[{"prop":"pass","value":1,"downSample":0.25},{"prop":"pass","value":2,"downSample":0.5},{"prop":"pass","value":3,"includeBg":true}]},"id":"zoom_blur"},{"breakpoints":[],"visible":true,"aspectRatio":1,"userDownsample":1,"layerType":"effect","type":"glyphDither","usesPingPong":false,"texture":{"src":"https://assets.unicorn.studio/media/glyphs/circles.png","sampler":"uSprite"},"trackMouse":0,"trackAxes":"xy","mouseMomentum":0,"parentLayer":"8855ac94-55db-4864-85b9-b35effdffe7f","animating":false,"isMask":0,"compiledFragmentShaders":["#version 300 es\nprecision highp float;in vec3 vVertexPosition;\nin vec2 vTextureCoord;\nuniform sampler2D uTexture;\nuniform sampler2D uSprite;\nuniform sampler2D uCustomTexture;uniform vec2 uMousePos;\nuniform vec2 uResolution;out vec4 fragColor;void main() {\nvec2 uv = vTextureCoord;\nvec2 pos = vec2(0.5, 0.5) + mix(vec2(0), (uMousePos-0.5), 0.0000);\nfloat aspectRatio = uResolution.x / uResolution.y;\nfloat aspectCorrection = mix(aspectRatio, 1./aspectRatio, 0.5);float gridSize = mix(0.05, 0.005, 0.8500);float baseGrid = 1.0 / gridSize;\nvec2 cellSize = vec2(1.0/(baseGrid * aspectRatio), 1.0/baseGrid) * aspectCorrection;\nvec2 offsetUv = uv - pos;\nvec2 cell = floor(offsetUv / cellSize);\nvec2 cellCenter = (cell + 0.5) * cellSize;\nvec2 pixelatedCoord = cellCenter + pos;\nvec4 bg = texture(uTexture, vTextureCoord);\nvec4 color = texture(uTexture, pixelatedCoord);float luminance = dot(color.rgb, vec3(0.2126, 0.7152, 0.0722));\nluminance = mix(luminance, 1.0 - luminance, float(0));\nfloat gamma = pow(mix(0.2, 2.2, 0.4000), 2.2);ivec2 customTextureSize = textureSize(uCustomTexture, 0);\nivec2 spriteTextureSize = textureSize(uSprite, 0);\nfloat selectedWidth = mix(float(spriteTextureSize.x), float(customTextureSize.x), float(0 == 6));\nfloat GLYPH_HEIGHT = mix(float(spriteTextureSize.y), float(customTextureSize.y), float(0 == 6));\nfloat scaleFactor = gridSize / GLYPH_HEIGHT;\nfloat numSprites = max(1.0, selectedWidth / GLYPH_HEIGHT);\nfloat numGlyphRows = 1.0;float spriteIndex = clamp(floor(luminance * numSprites), 0.0, numSprites - 1.0);\nfloat spriteIndexWithGamma = clamp(floor(luminance * numSprites * gamma), 0.0, numSprites - 1.0);\nfloat phaseOffset = floor(0.0000 * numSprites + 0.5);\nspriteIndexWithGamma = mod(spriteIndexWithGamma + phaseOffset, numSprites);\nfloat glyphIndex = 0.0;float normalizedSpriteSizeX = 1.0 / numSprites;\nfloat normalizedSpriteSizeY = 1.0 / numGlyphRows;float spriteX = (spriteIndexWithGamma * normalizedSpriteSizeX);vec2 spriteSheetUV = vec2(spriteX, glyphIndex / numGlyphRows);vec2 spriteSize = vec2(GLYPH_HEIGHT / aspectRatio, GLYPH_HEIGHT) * scaleFactor * aspectCorrection;\nvec2 localOffset = mod(uv - pos, spriteSize) / spriteSize;float inset = 0.5 / GLYPH_HEIGHT;\nlocalOffset = clamp(localOffset, inset, 1.0 - inset);spriteSheetUV += vec2(localOffset.x * normalizedSpriteSizeX, localOffset.y * normalizedSpriteSizeY);vec4 spriteColor = vec4(0.0);spriteColor = texture(uSprite, spriteSheetUV);\nfloat alpha = smoothstep(0.0, 1.0, spriteColor.r);vec3 cc = (color.rgb - spriteIndex * 0.04) * 1.4;\nvec3 col = cc;vec3 dithered = mix(\nmix(vec3(0.0), vec3(1.0), float(0)),\ncol,\nalpha\n);\ncolor.rgb = mix(bg.rgb, dithered, 1.0000);\nfragColor = color;}"],"compiledVertexShaders":["#version 300 es\nprecision mediump float;in vec3 aVertexPosition;\nin vec2 aTextureCoord;uniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\nuniform mat4 uTextureMatrix;out vec2 vTextureCoord;\nout vec3 vVertexPosition;void main() {\ngl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);\nvTextureCoord = (uTextureMatrix * vec4(aTextureCoord, 0.0, 1.0)).xy;\n}"],"data":{"depth":false,"uniforms":{},"isBackground":false,"texture":{"src":"","sampler":"uSprite"}},"id":"glyph_dither"},{"breakpoints":[],"aspectRatio":1.6,"userDownsample":1,"states":{"appear":[],"scroll":[],"hover":[],"mousemove":[]},"effects":["eb9bdf4c-2f12-4623-a570-25d1574f2242","eaea639b-61e9-4e29-9bc4-3aa2380e2397","e5da321d-1105-4d8f-af76-68017d532073","14b6ef78-4d2f-4893-a50d-39aad2246003","8855ac94-55db-4864-85b9-b35effdffe7f"],"anchorPoint":0,"mask":0,"maskDepthLayer":1,"layerType":"shape","width":200,"widthMode":1,"height":200,"heightMode":1,"left":0.16750694444444444,"top":0.16277777777777777,"compiledFragmentShaders":["#version 300 es\nprecision highp float;in vec2 vTextureCoord;\nin vec3 vVertexPosition;uniform vec2 uArtboardResolution;uniform vec2 uMousePos;const float TAU = 6.28318530718;\nconst float PI = 3.14159265;out vec4 fragColor;vec2 rotate2D(vec2 p, float angle) {\nfloat s = sin(angle);\nfloat c = cos(angle);\nreturn vec2(p.x * c - p.y * s, p.x * s + p.y * c);\n}vec2 getAnchorOffsets() {\nreturn vec2(0.0, 0.0);\n}vec3 getFillColor(vec2 localPos, vec2 elementSize, float signedDist, float maxInset) {\nvec2 halfSize = elementSize * 0.5;\nvec2 p = localPos - halfSize;return vec3(0, 0, 0);\n}float sdBox(vec2 p, vec2 b) {\nvec2 d = abs(p) - b;\nreturn length(max(d, 0.0)) + min(max(d.x, d.y), 0.0);\n}float sdShape(vec2 canvasPosPx, vec2 elementPosPx, vec2 elementSizePx, float rotationTurns) {\nvec2 p = vec2(0.0);\nvec2 halfSize = vec2(0.0);halfSize = uArtboardResolution * 0.5;\np = canvasPosPx - halfSize;\nreturn sdBox(p, halfSize);elementSizePx = abs(elementSizePx);vec2 centerPx = elementPosPx + elementSizePx * 0.5;\nvec2 rel = canvasPosPx - centerPx;\nvec2 local = rotate2D(rel, -rotationTurns * TAU) + elementSizePx * 0.5;\np = local - elementSizePx * 0.5;\nhalfSize = elementSizePx * 0.5;\nreturn sdBox(p, halfSize);\n}vec4 sampleShape(vec2 canvasUV) {\nvec2 canvasPosPx = vec2(canvasUV.x * uArtboardResolution.x, (1.0 - canvasUV.y) * uArtboardResolution.y);float absWidth = 200.0000;\nfloat absHeight = 200.0000;if (1 == 2) {\nabsWidth = absHeight * 1.6000;\n} else if (1 == 2) {\nabsHeight = absWidth / 1.6000;\n}vec2 elementSizePx = vec2(absWidth, absHeight);\nvec2 elementPosPx = vec2(0.1675, 0.1628) * uArtboardResolution - getAnchorOffsets() * elementSizePx;float dist = sdShape(canvasPosPx, elementPosPx, elementSizePx, 0.0000);\nfloat aa = max(length(vec2(dFdx(dist), dFdy(dist))), 0.75);float fillAlpha = 1.0 - smoothstep(mix(0.0, -150., 0.0000), mix(aa, 150., 0.0000), dist);\nvec2 localPos;\nlocalPos = canvasPosPx;\nvec2 localSize;\nlocalSize = uArtboardResolution;\nvec2 centerPx;\ncenterPx = uArtboardResolution * 0.5;\nfloat centerDist = sdShape(centerPx, elementPosPx, elementSizePx, 0.0000);\nfloat maxInset = max(-centerDist, 0.00001);vec3 fillRgb = getFillColor(localPos, localSize, dist, maxInset);\nfloat finalFillAlpha = fillAlpha * 1.0000;\nvec4 fill = vec4(fillRgb * finalFillAlpha, finalFillAlpha);float strokeAlpha = 0.0;\nvec4 stroke = vec4(vec3(0, 0, 0) * strokeAlpha, strokeAlpha);\nvec4 col = stroke + fill * (1.0 - stroke.a);\nreturn col;\n}vec4 getSourceOutput(vec2 uv) {\nreturn sampleShape(uv);\n}void main() {\nvec2 uv = vTextureCoord;\nvec2 pos = (uMousePos - 0.5) * 0.0000;uv -= pos;fragColor = getSourceOutput(uv);\n}"],"compiledVertexShaders":["#version 300 es\nprecision highp float;in vec3 aVertexPosition;\nin vec2 aTextureCoord;uniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\nuniform vec2 uMousePos;out vec2 vTextureCoord;\nout vec3 vVertexPosition;void main() {\nfloat angleX = uMousePos.y * 0.5 - 0.25;\nfloat angleY = (1.-uMousePos.x) * 0.5 - 0.25;mat4 rotateX = mat4(1.0, 0.0, 0.0, 0.0,\n0.0, cos(angleX), -sin(angleX), 0.0,\n0.0, sin(angleX), cos(angleX), 0.0,\n0.0, 0.0, 0.0, 1.0);\nmat4 rotateY = mat4(cos(angleY), 0.0, sin(angleY), 0.0,\n0.0, 1.0, 0.0, 0.0,\n-sin(angleY), 0.0, cos(angleY), 0.0,\n0.0, 0.0, 0.0, 1.0);mat4 rotationMatrix = rotateX * rotateY;\ngl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);\nvVertexPosition = (rotationMatrix * vec4(aVertexPosition, 1.0)).xyz;\nvTextureCoord = (vec4(aTextureCoord, 0.0, 1.0)).xy;\n}"],"data":{"uniforms":{"artboardResolution":{"name":"uArtboardResolution","type":"2f","value":{"type":"Vec2","_x":1440,"_y":900}},"aspectRatio":{"name":"uAspectRatio","type":"1f","value":1.6}},"compositeShader":{"fragmentShader":"#version 300 es\nprecision highp float;\nin vec2 vTextureCoord;\nin vec3 vVertexPosition;uniform sampler2D uBgTexture;\nuniform sampler2D uTexture;vec3 blend (int blendMode, vec3 src, vec3 dst) {\nreturn vec3((src.x <= 0.5) ? (dst.x - (1.0 - 2.0 * src.x) * dst.x * (1.0 - dst.x)) : (((src.x > 0.5) && (dst.x <= 0.25)) ? (dst.x + (2.0 * src.x - 1.0) * (4.0 * dst.x * (4.0 * dst.x + 1.0) * (dst.x - 1.0) + 7.0 * dst.x)) : (dst.x + (2.0 * src.x - 1.0) * (sqrt(dst.x) - dst.x))), (src.y <= 0.5) ? (dst.y - (1.0 - 2.0 * src.y) * dst.y * (1.0 - dst.y)) : (((src.y > 0.5) && (dst.y <= 0.25)) ? (dst.y + (2.0 * src.y - 1.0) * (4.0 * dst.y * (4.0 * dst.y + 1.0) * (dst.y - 1.0) + 7.0 * dst.y)) : (dst.y + (2.0 * src.y - 1.0) * (sqrt(dst.y) - dst.y))), (src.z <= 0.5) ? (dst.z - (1.0 - 2.0 * src.z) * dst.z * (1.0 - dst.z)) : (((src.z > 0.5) && (dst.z <= 0.25)) ? (dst.z + (2.0 * src.z - 1.0) * (4.0 * dst.z * (4.0 * dst.z + 1.0) * (dst.z - 1.0) + 7.0 * dst.z)) : (dst.z + (2.0 * src.z - 1.0) * (sqrt(dst.z) - dst.z))));\n}const float STEPS = 24.0;\nconst float PI = 3.1415926;out vec4 fragColor;vec4 getNormalOutput(vec4 color, vec4 background) {\nvec3 unpremultColor = color.rgb / max(color.a, 0.0001);\nvec3 blendedColor = blend(12, unpremultColor, background.rgb);\ncolor = vec4(blendedColor, 1.0) * (color.a * 0.8000);\ncolor = color + background * (1.0 - color.a);\nreturn color;\nreturn mix(background, color + background * (1.0 - color.a), 0.8000);\n}vec4 getOutputByMode(vec4 color, vec4 background) {\nreturn getNormalOutput(color, background);\n}void main() {\nvec2 uv = vTextureCoord;\nvec2 pos = vec2(0);uv -= pos;vec4 background = vec4(0);background = texture(uBgTexture, vTextureCoord);\nvec4 color = texture(uTexture, uv);vec4 col = getOutputByMode(color, background);fragColor = col;\n}","vertexShader":"#version 300 es\nprecision highp float;in vec3 aVertexPosition;\nin vec2 aTextureCoord;uniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\nuniform mat4 uTextureMatrix;\nuniform vec2 uMousePos;out vec2 vTextureCoord;\nout vec3 vVertexPosition;void main() {\nfloat angleX = uMousePos.y * 0.5 - 0.25;\nfloat angleY = (1.-uMousePos.x) * 0.5 - 0.25;mat4 rotateX = mat4(1.0, 0.0, 0.0, 0.0,\n0.0, cos(angleX), -sin(angleX), 0.0,\n0.0, sin(angleX), cos(angleX), 0.0,\n0.0, 0.0, 0.0, 1.0);\nmat4 rotateY = mat4(cos(angleY), 0.0, sin(angleY), 0.0,\n0.0, 1.0, 0.0, 0.0,\n-sin(angleY), 0.0, cos(angleY), 0.0,\n0.0, 0.0, 0.0, 1.0);mat4 rotationMatrix = rotateX * rotateY;\ngl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);\nvVertexPosition = (rotationMatrix * vec4(aVertexPosition, 1.0)).xyz;\nvTextureCoord = (uTextureMatrix * vec4(aTextureCoord, 0.0, 1.0)).xy;\n}"},"compositeUniforms":{"resolution":{"name":"uResolution","type":"2f","value":{"type":"Vec2","_x":1080,"_y":1080}},"opacity":{"name":"uOpacity","type":"1f","value":1},"mousePos":{"name":"uMousePos","type":"2f","value":{"type":"Vec2","_x":0.5,"_y":0.5}}}},"id":"shape"},{"breakpoints":[],"visible":true,"aspectRatio":1,"userDownsample":0.25,"layerType":"effect","type":"dither","usesPingPong":false,"speed":0.25,"texture":false,"parentLayer":"14b6ef78-4d2f-4893-a50d-39aad2246003","animating":false,"mouseMomentum":0,"isMask":0,"compiledFragmentShaders":["#version 300 es\nprecision highp float;\nprecision highp int;in vec3 vVertexPosition;\nin vec2 vTextureCoord;uniform sampler2D uTexture;\nuniform sampler2D uBlueNoise;uniform float uTime;uniform vec2 uResolution;uvec2 pcg2d(uvec2 v) {\nv = v * 1664525u + 1013904223u;\nv.x += v.y * v.y * 1664525u + 1013904223u;\nv.y += v.x * v.x * 1664525u + 1013904223u;\nv ^= v >> 16;\nv.x += v.y * v.y * 1664525u + 1013904223u;\nv.y += v.x * v.x * 1664525u + 1013904223u;\nreturn v;\n}float randFibo(vec2 p) {\nuvec2 v = floatBitsToUint(p);\nv = pcg2d(v);\nuint r = v.x ^ v.y;\nreturn float(r) / float(0xffffffffu);\n}const int MAX_LEVEL = 4;\nconst float PI2 = 6.28318530718;float getBlueNoise(vec2 st, float delta, float size) {\nivec2 texSize = textureSize(uBlueNoise, 0);\nvec4 blueNoise = texelFetch(uBlueNoise, ivec2(fract(st * (uResolution/size)/vec2(texSize) * vec2(texSize.x/texSize.y, 1.0)) * vec2(texSize)) % texSize, 0);\nreturn mod((blueNoise.r - 0.5) * PI2 + (delta * (1.0 / PI2)), PI2) / PI2 - 0.005;\n}vec3 dither(vec3 color, vec2 st) {\nfloat delta = floor(uTime);\nvec2 offset = vec2(randFibo(vec2(123,16) + delta), randFibo(vec2(56,96) + delta));\nfloat noise = 0.0;\nnoise = getBlueNoise(st, delta, 4.);\nfloat dither_threshold = max(0.0001, 0.5000);\nfloat num_levels = 1.0 / dither_threshold;\nreturn floor(color * num_levels + noise) / num_levels;\n}out vec4 fragColor;void main() {\nvec2 uv = vTextureCoord;\nfloat delta = floor(uTime);\nvec4 color = texture(uTexture, uv);if(color.a == 0.) {\nfragColor = vec4(0);\nreturn;\n}color.rgb = mix(color.rgb, dither(color.rgb, vTextureCoord), 0.1700);\nfragColor = color;}"],"compiledVertexShaders":["#version 300 es\nprecision mediump float;in vec3 aVertexPosition;\nin vec2 aTextureCoord;uniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\nuniform mat4 uTextureMatrix;out vec2 vTextureCoord;\nout vec3 vVertexPosition;void main() {\ngl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);\nvTextureCoord = (uTextureMatrix * vec4(aTextureCoord, 0.0, 1.0)).xy;\n}"],"data":{"depth":false,"uniforms":{},"isBackground":false,"texture":{"src":"https://assets.unicorn.studio/media/blue_noise_med.png","sampler":"uBlueNoise"}},"id":"dither"},{"breakpoints":[],"visible":true,"aspectRatio":1,"userDownsample":0.25,"states":{"appear":[{"local":{"pendingChanges":{},"changeDebouncer":null,"dragSession":null},"type":"appear","id":"82ac011b-9630-4735-a6b9-4eae123b91c0","prop":"phase","transition":{"ease":"easeInOutCirc","duration":1250,"delay":0},"complete":false,"progress":0,"value":0,"endValue":0.8,"initialized":false,"breakpoints":[],"loop":"none","loopDelay":0,"uniformData":{"type":"1f","name":"uPhase"}},{"local":{"pendingChanges":{},"changeDebouncer":null,"dragSession":null},"type":"appear","id":"094830f5-4324-4460-bc15-cce7f3a7d3ad","prop":"phase","transition":{"duration":1500,"ease":"easeInOutCirc","delay":1750},"complete":false,"progress":0,"value":0.8,"endValue":1.8,"initialized":false,"breakpoints":[],"loop":"none","loopDelay":0,"uniformData":{"type":"1f","name":"uPhase"}},{"local":{"pendingChanges":{},"changeDebouncer":null,"dragSession":null},"type":"appear","id":"55e190e2-07cc-4c45-b2b0-3e4a4cb6ec9f","prop":"phase","transition":{"delay":3750,"ease":"easeInOutCirc","duration":1600},"complete":false,"progress":0,"value":1.8,"endValue":2.8,"initialized":false,"breakpoints":[],"loop":"none","loopDelay":0,"uniformData":{"type":"1f","name":"uPhase"}}],"scroll":[],"hover":[],"mousemove":[]},"layerType":"effect","type":"beam","usesPingPong":false,"phase":0,"speed":0.25,"trackMouse":0,"trackAxes":"xy","mouseMomentum":0,"texture":false,"parentLayer":"eb9bdf4c-2f12-4623-a570-25d1574f2242","animating":true,"isMask":0,"compiledFragmentShaders":["#version 300 es\nprecision highp float;\nprecision highp int;in vec2 vTextureCoord;uniform sampler2D uTexture;uniform float uTime;\nuniform float uPhase;uniform vec2 uMousePos;\nuniform vec2 uResolution;\nvec3 blend (int blendMode, vec3 src, vec3 dst) {\nreturn src;\n}uvec2 pcg2d(uvec2 v) {\nv = v * 1664525u + 1013904223u;\nv.x += v.y * v.y * 1664525u + 1013904223u;\nv.y += v.x * v.x * 1664525u + 1013904223u;\nv ^= v >> 16;\nv.x += v.y * v.y * 1664525u + 1013904223u;\nv.y += v.x * v.x * 1664525u + 1013904223u;\nreturn v;\n}float randFibo(vec2 p) {\nuvec2 v = floatBitsToUint(p);\nv = pcg2d(v);\nuint r = v.x ^ v.y;\nreturn float(r) / float(0xffffffffu);\n}const float TAU = 6.28318530718;vec3 Tonemap_tanh(vec3 x) {\nx = clamp(x, -40.0, 40.0);\nreturn (exp(x) - exp(-x)) / (exp(x) + exp(-x));\n}out vec4 fragColor;const float PI = 3.14159265359;\nconst float TWO_PI = 2.0 * PI;mat2 rot(float a) {\nreturn mat2(cos(a),-sin(a),sin(a),cos(a));\n}vec3 pal( in float t, in vec3 a, in vec3 b, in vec3 c, in vec3 d ) {\nreturn a + b*cos( TAU*(c*t+d) );\n}float drawExpandingRings(vec2 uv, vec2 center, float scale, float angle) {\nuv.x *= uResolution.x/uResolution.y;\ncenter.x *= uResolution.x/uResolution.y;\nvec2 skew = vec2(0.4500, 1. - 0.4500) * 2.;\nuv = uv * rot(0.0000 * TWO_PI) * skew;\ncenter = center * rot(0.0000 * TWO_PI) * skew;\nfloat modulo = fract(uTime * 0.02 + uPhase);\nfloat ringRadius = scale * 0.5 * modulo;\nfloat distFromCenter = length(uv - center);\nfloat ringDist = abs(distFromCenter - ringRadius);\nfloat lineRadius = 2.5300 * modulo;\nfloat brightness = lineRadius / max(0.0001, 1.0 - smoothstep(0.2, 0.002, ringDist + 0.02));brightness = brightness * max(0., 1.-modulo);return brightness * pow(1.-ringDist, 3.);\n}float getBeam(vec2 uv) {\nvec2 pos = vec2(0.5, 0.5) + mix(vec2(0), (uMousePos-0.5), 0.0000);\nreturn drawExpandingRings(uv, pos, 1.4000, 0.0000);\n}void main() {\nvec2 uv = vTextureCoord;\nvec4 bg = texture(uTexture, uv);float beam = getBeam(uv);\nfloat ssBeam = smoothstep(0.0, 1.0, beam);\nfloat chroma = 0.4;vec3 beamColor = pal(beam,\n(vec3(0.9333333333333333, 0.9333333333333333, 0.9333333333333333) + vec3(0.5)) * 0.5,\nvec3(0.5) - vec3(0.9333333333333333, 0.9333333333333333, 0.9333333333333333),\nvec3(1.0 - chroma, 1.0, 1. + chroma),\nvec3(chroma, 0., -chroma)\n);beamColor = mix(beamColor, vec3(0.9333333333333333, 0.9333333333333333, 0.9333333333333333), mix(1.0, ssBeam, 0.0000)) * beam;\nfloat dither = (randFibo(gl_FragCoord.xy) - 0.5) / 255.0;vec3 blended = blend(0, Tonemap_tanh(beamColor), bg.rgb);\nvec3 result = mix(bg.rgb, blended, 1.0000);\nresult += dither;vec4 color = vec4(result, max(bg.a, beam));\nfragColor = color;}"],"compiledVertexShaders":["#version 300 es\nprecision mediump float;in vec3 aVertexPosition;\nin vec2 aTextureCoord;uniform mat4 uMVMatrix;\nuniform mat4 uPMatrix;\nuniform mat4 uTextureMatrix;out vec2 vTextureCoord;\nout vec3 vVertexPosition;void main() {\ngl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);\nvTextureCoord = (uTextureMatrix * vec4(aTextureCoord, 0.0, 1.0)).xy;\n}"],"data":{"depth":false,"uniforms":{},"isBackground":false},"id":"beam1"}],"options":{"name":"Ramp NYC25 (Remix)","fps":60,"dpi":1.5,"scale":1,"includeLogo":false,"isProduction":false},"version":"2.0.5","id":"2jHcNIauVW6eJk5dMlY0"}
+var US_FPS = 60;
+var US_SCALE = 1;
+var US_DPI = 1.5;
+var US_ORIG_BG = 'vec3(0.09803921568627451, 0.08235294117647059, 0.30196078431372547)';
 
-// ─── Color Helpers ──────────────────────────────────────────────
-function srgbToLinear(c) {
-  return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
-}
+(function () {
+  var scene = null;
+  var scriptLoaded = false;
+  var blobUrl = null;
 
-function parseCSSColor(value) {
-  if (!value) return null;
-  var tmp = document.createElement("div");
-  tmp.style.color = value;
-  document.body.appendChild(tmp);
-  var computed = getComputedStyle(tmp).color;
-  document.body.removeChild(tmp);
-  var m = computed.match(/[\d.]+/g);
-  if (!m || m.length < 3) return null;
-  return [srgbToLinear(+m[0] / 255), srgbToLinear(+m[1] / 255), srgbToLinear(+m[2] / 255)];
-}
-
-function getAccentColors() {
-  var style = getComputedStyle(document.documentElement);
-
-  // Stop 1: accent-primary token
-  var accent = parseCSSColor(
-    style.getPropertyValue("--accent-a11").trim()
-    || style.getPropertyValue("--accent-9").trim()
-  );
-
-  // Stop 2: dark mode uses black (composited via screen blend), light reads card-background
-  var bg;
-  if (isDarkMode()) {
-    bg = [0.0, 0.0, 0.0];
-  } else {
-    bg = parseCSSColor(style.getPropertyValue("--card-background").trim());
-    if (!bg) bg = [1.0, 1.0, 1.0];
+  function loadScript(src) {
+    return new Promise(function (resolve, reject) {
+      if (scriptLoaded) { resolve(); return; }
+      var s = document.createElement("script");
+      s.src = src;
+      s.onload = function () { scriptLoaded = true; resolve(); };
+      s.onerror = reject;
+      document.head.appendChild(s);
+    });
   }
 
-  return { c1: bg, c2: accent };
-}
-
-// ─── Vertex Shader ──────────────────────────────────────────────
-var VERT = `#version 300 es
-precision mediump float;
-in vec2 aPos;
-out vec2 vUv;
-void main() {
-  gl_Position = vec4(aPos, 0, 1);
-  vUv = aPos * 0.5 + 0.5;
-}`;
-
-// ─── Fragment Shader ──────────────
-var FRAG = `#version 300 es
-precision highp float;
-precision mediump int;
-
-in vec2 vUv;
-uniform float uTime;
-uniform vec2 uRes;
-uniform vec3 uC1;
-uniform vec3 uC2;
-uniform vec2 uNPos;
-uniform float uDarkMode;
-out vec4 O;
-
-const float TAU = 6.28318530718;
-
-const mat3 GOLD = mat3(
-  -0.571464913, 0.814921382, 0.096597072,
-  -0.278044873, -0.303026659, 0.911518454,
-  0.772087367, 0.494042493, 0.399753815);
-
-const mat3 GOLD_PHI = mat3(
-  -0.924648, -0.449886, 1.249265,
-  1.318571, -0.490308, 0.800377,
-  0.156297, 1.474868, 0.646816);
-
-const mat3 ROT1 = mat3(
-  -0.57, 0.81, 0.10,
-  -0.28, -0.30, 0.91,
-  0.77, 0.49, 0.40);
-
-const mat3 ROT2 = mat3(
-  0.1746, -0.6561, 0.7314,
-  0.9452, 0.3072, 0.0211,
-  -0.2389, 0.6865, 0.6863);
-
-float interleavedGradientNoise(vec2 st) {
-  return fract(52.9829189 * fract(dot(st, vec2(0.06711056, 0.00583715))));
-}
-
-vec3 safeCbrt(vec3 v) {
-  return sign(v) * pow(abs(v), vec3(1.0 / 3.0));
-}
-
-vec3 oklab_mix(vec3 lin1, vec3 lin2, float a) {
-  const mat3 kCONEtoLMS = mat3(
-    0.4121656120, 0.2118591070, 0.0883097947,
-    0.5362752080, 0.6807189584, 0.2818474174,
-    0.0514575653, 0.1074065790, 0.6302613616);
-  const mat3 kLMStoCONE = mat3(
-    4.0767245293, -1.2681437731, -0.0041119885,
-    -3.3072168827, 2.6093323231, -0.7034763098,
-    0.2307590544, -0.3411344290, 1.7068625689);
-  vec3 lms1 = safeCbrt(kCONEtoLMS * lin1);
-  vec3 lms2 = safeCbrt(kCONEtoLMS * lin2);
-  vec3 lms = mix(lms1, lms2, a);
-  lms *= 1.0 + 0.02 * a * (1.0 - a);
-  return kLMStoCONE * (lms * lms * lms);
-}
-
-vec3 Tonemap_ACES(vec3 x) {
-  return (x * (2.51 * x + 0.03)) / (x * (2.43 * x + 0.59) + 0.14);
-}
-
-vec3 pal(float t, vec3 a, vec3 b, vec3 c, vec3 d) {
-  return a + b * cos(TAU * (c * t + d));
-}
-
-float dot_noise(vec3 p) {
-  return dot(cos(GOLD * p), sin(GOLD_PHI * p));
-}
-
-float sdCircle(vec2 uv, vec2 scale) {
-  return length(uv / scale) - 1.0;
-}
-
-float getDistance(vec2 uv, float scale) {
-  vec2 finalScale = scale * vec2(1.0 + 0.62 * 0.5, 1.0 - 0.62 * 0.5);
-  finalScale *= mix(0.8, 1.2, 0.69);
-  return sdCircle(uv, finalScale);
-}
-
-float density(vec3 q, float amplitude) {
-  float d = 0.0;
-  float fd = 0.0;
-
-  q.xy = (q.xy - 0.5) * vec2(1.0 - 0.48 * 0.5, 1.0 + 0.48 * 0.5) + 0.5;
-  q.z *= mix(1.0, 0.001, 0.93);
-
-  float n = dot_noise(q * vec3(1.6, 0.8, 1.1)) - 0.2;
-  d += amplitude * n;
-  fd += max(0.0, d * 0.5 + 0.5) * amplitude;
-
-  q = (ROT1 * (q * vec3(0.8, 1.6, 0.9))) * 2.2 + vec3(1.025, 0.575, 0.425);
-  amplitude *= 0.5 + 0.5 * (n * 0.5);
-  n = dot_noise(q) - 0.2;
-  d += amplitude * n;
-  float val = d * 0.5 + 0.5;
-  fd += (val * val) * amplitude;
-
-  q = (ROT2 * (q * vec3(1.6, 0.8, 1.1))) * 2.6 + vec3(2.05, 1.15, 0.85);
-  amplitude *= 0.5 + 0.5 * abs(n);
-  n = dot_noise(q) + 0.2;
-  d += amplitude * n;
-  val = d * 0.5 + 0.5;
-  fd += (val * val) * amplitude;
-
-  return fd;
-}
-
-// ── Grain helpers ──
-uvec2 pcg2d(uvec2 v) {
-  v = v * 1664525u + 1013904223u;
-  v.x += v.y * v.y * 1664525u + 1013904223u;
-  v.y += v.x * v.x * 1664525u + 1013904223u;
-  v ^= v >> 16;
-  v.x += v.y * v.y * 1664525u + 1013904223u;
-  v.y += v.x * v.x * 1664525u + 1013904223u;
-  return v;
-}
-
-float randFibo(vec2 p) {
-  uvec2 v = pcg2d(floatBitsToUint(p));
-  return float(v.x ^ v.y) / 4294967295.0;
-}
-
-vec3 grainBlend(vec3 src, vec3 dst) {
-  return vec3(
-    dst.x <= 0.5 ? 2.0 * src.x * dst.x : 1.0 - 2.0 * (1.0 - dst.x) * (1.0 - src.x),
-    dst.y <= 0.5 ? 2.0 * src.y * dst.y : 1.0 - 2.0 * (1.0 - dst.y) * (1.0 - src.y),
-    dst.z <= 0.5 ? 2.0 * src.z * dst.z : 1.0 - 2.0 * (1.0 - dst.z) * (1.0 - src.z));
-}
-
-vec3 srgb_from_linear(vec3 lin) {
-  return pow(max(lin, vec3(0.0)), vec3(1.0 / 2.2));
-}
-
-// ── Main ──
-void main() {
-  vec2 aspect = vec2(uRes.x / uRes.y, 1.0);
-  vec2 uv = vUv;
-  vec2 pos = uNPos;
-
-  vec2 sdfUv = (uv - pos) * aspect;
-  float sdf = getDistance(sdfUv, 2.5);
-  float ampSdf = smoothstep(0.1, 0.69 * 1.5, -sdf);
-
-  vec3 col = vec3(0.0);
-  float transmittance = 1.0;
-
-  if (ampSdf > 0.0) {
-    vec2 uvCentered = (uv - pos) * aspect;
-    vec3 ro = vec3(pos, -3.0);
-    vec3 rd = normalize(vec3(uvCentered, 1.0));
-
-    const int STEPS = 40;
-    float MAX_DIST = 2.86;
-    float baseStep = MAX_DIST / float(STEPS);
-    float ign = interleavedGradientNoise(uRes * vUv);
-    float t = baseStep * ign * 0.999;
-    float wrappedTime = uTime * 0.05;
-
-    // Grayscale palette (Unicorn nebula layer originals)
-    vec3 colorCenter = oklab_mix(vec3(0.1608), vec3(0.8157), 0.5);
-    vec3 colorDelta  = oklab_mix(vec3(0.8157), vec3(0.1608), 0.5);
-    float absorptionFactor = baseStep * -6.0;
-    float scale = 8.0;
-    float ampBase = mix(0.2, 1.2, 0.63) * 2.0;
-    float amplitude = ampBase;
-
-    vec3 q_ro = ro * scale + vec3(0.65, 0.0, 2.66) * wrappedTime;
-    vec3 q_rd = rd * scale;
-    float accumulatedLight = 0.0;
-    bool hit = false;
-    int emptySteps = 0;
-
-    for (int i = 0; i < STEPS; i++) {
-      if (transmittance < 0.01 || t > MAX_DIST) break;
-      if (!hit && emptySteps > 20) break;
-      if (accumulatedLight > 0.33) break;
-
-      vec3 q = q_ro + q_rd * t;
-      float d = density(q, amplitude);
-      float depthRatio = t / MAX_DIST;
-      float pz = ro.z + rd.z * t;
-      d *= smoothstep(-3.0, -2.0, pz) * (1.0 - depthRatio * depthRatio);
-
-      if (d > 0.0001) {
-        float d_val = 0.25 / d;
-        float atten = smoothstep(0.0, 1.0, d_val);
-        vec3 mixed = pal(atten,
-          colorCenter, colorDelta,
-          vec3(0.5, 1.0, 1.5), vec3(0.5, 0.0, -0.5));
-        vec3 light = mixed * atten;
-        float absorption = exp(-d * baseStep * 20.0);
-        vec3 contribution = light * d * transmittance * absorptionFactor;
-        col += contribution;
-        accumulatedLight += abs(dot(contribution, vec3(0.299, 0.587, 0.114)));
-        transmittance *= absorption;
-        emptySteps = 0;
-        hit = true;
-      } else {
-        emptySteps++;
-      }
-
-      t += baseStep;
+  function parseColor(str) {
+    var hex = str.match(/^#([0-9a-f]{3,8})$/i);
+    if (hex) {
+      var h = hex[1];
+      if (h.length === 3) h = h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+      return [parseInt(h.slice(0,2),16)/255, parseInt(h.slice(2,4),16)/255, parseInt(h.slice(4,6),16)/255];
     }
-  }
-
-  // Compositing
-  col *= ampSdf;
-  col = Tonemap_ACES(col);
-  float ft = mix(1.0, transmittance, ampSdf);
-  ft = smoothstep(0.0, 1.0, ft);
-
-  // Composite onto white background
-  vec3 composite = col + ft;
-
-  // Gradient map: dark areas → accent (uC2), bright areas → background (uC1)
-  float lum = dot(composite, vec3(0.299, 0.587, 0.114));
-  float gmPos = smoothstep(0.0, 1.0, lum);
-  vec3 gmColor = srgb_from_linear(oklab_mix(uC2, uC1, gmPos));
-
-  float nebulaOpacity = max(0.0, 1.0 - ft);
-
-  // Grain
-  if (nebulaOpacity > 0.001) {
-    vec2 st = vUv * uRes;
-    float delta = fract(uTime / 20.0);
-    vec3 grainRGB = vec3(
-      randFibo(st + vec2(1, 2) + delta),
-      randFibo(st + vec2(2, 3) + delta),
-      randFibo(st + vec2(3, 4) + delta));
-    gmColor = mix(gmColor, grainBlend(grainRGB, gmColor), 0.17);
-  }
-
-  // Composite onto card background
-  vec3 cardBg = srgb_from_linear(uC1);
-  float opacity = nebulaOpacity * mix(0.5, 1.0, uDarkMode);
-  vec3 finalColor = mix(cardBg, gmColor, opacity);
-  O = vec4(finalColor, 1.0);
-}`;
-
-// ─── WebGL Setup ─────────────────────────────────────────────────
-function initWebGL(canvas) {
-  var gl = canvas.getContext("webgl2", { alpha: true, premultipliedAlpha: false });
-  if (!gl) return null;
-
-  function compile(src, type) {
-    var s = gl.createShader(type);
-    gl.shaderSource(s, src);
-    gl.compileShader(s);
-    if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
-      console.error("Shader error:", gl.getShaderInfoLog(s));
-      return null;
-    }
-    return s;
-  }
-
-  var vs = compile(VERT, gl.VERTEX_SHADER);
-  var fs = compile(FRAG, gl.FRAGMENT_SHADER);
-  if (!vs || !fs) return null;
-
-  var pg = gl.createProgram();
-  gl.attachShader(pg, vs);
-  gl.attachShader(pg, fs);
-  gl.linkProgram(pg);
-  if (!gl.getProgramParameter(pg, gl.LINK_STATUS)) {
-    console.error("Program error:", gl.getProgramInfoLog(pg));
+    var rgb = str.match(/rgba?\(\s*(\d+),\s*(\d+),\s*(\d+)/);
+    if (rgb) return [parseInt(rgb[1])/255, parseInt(rgb[2])/255, parseInt(rgb[3])/255];
     return null;
   }
 
-  var buf = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
-
-  var aPos = gl.getAttribLocation(pg, "aPos");
-  gl.enableVertexAttribArray(aPos);
-  gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
-
-  gl.useProgram(pg);
-
-  var uTime = gl.getUniformLocation(pg, "uTime");
-  var uRes = gl.getUniformLocation(pg, "uRes");
-  var uC1 = gl.getUniformLocation(pg, "uC1");
-  var uC2 = gl.getUniformLocation(pg, "uC2");
-  var uNPos = gl.getUniformLocation(pg, "uNPos");
-  var uDarkMode = gl.getUniformLocation(pg, "uDarkMode");
-
-  gl.uniform2fv(uNPos, NEBULA_POS);
-
-  gl.enable(gl.BLEND);
-  gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-
-  return { gl: gl, uTime: uTime, uRes: uRes, uDarkMode: uDarkMode, uC1: uC1, uC2: uC2 };
-}
-
-// ─── Theme Detection ─────────────────────────────────────────────
-function isDarkMode() {
-  var html = document.documentElement;
-  var theme = html.getAttribute("data-theme");
-  if (theme === "dark") return true;
-  if (theme === "light") return false;
-  if (html.classList.contains("dark")) return true;
-  if (html.classList.contains("light")) return false;
-  // Fallback: check computed background luminance
-  var bg = getComputedStyle(document.body).backgroundColor;
-  var m = bg.match(/\d+/g);
-  if (m) {
-    var lum = (0.299 * +m[0] + 0.587 * +m[1] + 0.114 * +m[2]) / 255;
-    return lum < 0.5;
-  }
-  return window.matchMedia("(prefers-color-scheme: dark)").matches;
-}
-
-// ─── Injection ───────────────────────────────────────────────────
-(function () {
-  var renderer = null;
-  var wrapper = null;
-  var rafId = null;
-  var lastFrame = 0;
-  var interval = 1000 / FPS;
-
-  function applyTheme() {
-    if (!renderer || !wrapper) return;
-    var dark = isDarkMode();
-    renderer.gl.uniform1f(renderer.uDarkMode, dark ? 1.0 : 0.0);
-    wrapper.style.mixBlendMode = dark ? "screen" : "normal";
-
-    var colors = getAccentColors();
-    renderer.gl.uniform3fv(renderer.uC1, colors.c1);
-    renderer.gl.uniform3fv(renderer.uC2, colors.c2);
+  function getSceneBlobUrl() {
+    if (blobUrl) URL.revokeObjectURL(blobUrl);
+    var json = JSON.stringify(US_SCENE_DATA);
+    var accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim();
+    if (accent) {
+      var rgb = parseColor(accent);
+      if (rgb) {
+        var f = 0.3;
+        var bg = 'vec3(' + (rgb[0]*f) + ', ' + (rgb[1]*f) + ', ' + (rgb[2]*f) + ')';
+        json = json.split(US_ORIG_BG).join(bg);
+      }
+    }
+    blobUrl = URL.createObjectURL(new Blob([json], { type: "application/json" }));
+    return blobUrl;
   }
 
-  function removeScene() {
-    var existing = document.querySelector(".background-graphic-wrapper");
-    if (existing) {
-      existing.remove();
-      if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
-      renderer = null;
-      wrapper = null;
+  function destroyScene() {
+    if (scene) {
+      scene.destroy();
+      scene = null;
     }
   }
 
   function injectScene() {
-    var anchor = document.querySelector(".nebula-anchor");
+    var anchor = document.querySelector(".unicorn-anchor");
 
-    // No marker on this page — tear down if it was running
-    if (!anchor) { removeScene(); return; }
-
-    // Already injected
-    if (document.querySelector(".background-graphic-wrapper")) return;
-
-    // Inject into Fern's background layer, or fall back to body
-    var cw = document.querySelector(".fern-background-image") || document.body;
-
-    wrapper = document.createElement("div");
-    wrapper.className = "background-graphic-wrapper";
-    wrapper.style.cssText = "position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:0;pointer-events:none;";
-
-    var canvas = document.createElement("canvas");
-    canvas.style.cssText = "display:block;width:100%;height:100%;";
-    wrapper.appendChild(canvas);
-    cw.appendChild(wrapper);
-
-    renderer = initWebGL(canvas);
-    if (!renderer) return;
-
-    applyTheme();
-
-    function resize() {
-      var dpr = Math.min(window.devicePixelRatio, 1.5);
-      canvas.width = window.innerWidth * dpr;
-      canvas.height = window.innerHeight * dpr;
-      renderer.gl.viewport(0, 0, canvas.width, canvas.height);
-      renderer.gl.uniform2f(renderer.uRes, canvas.width, canvas.height);
+    // No marker on this page — tear down if running
+    if (!anchor) {
+      var old = document.getElementById("unicorn-embed");
+      if (old) old.remove();
+      destroyScene();
+      return;
     }
 
-    resize();
-    window.addEventListener("resize", resize);
+    // Use Fern's native background container
+    var bg = document.querySelector(".fern-background-image");
+    if (!bg) return;
 
-    var start = performance.now();
-    function frame(now) {
-      rafId = requestAnimationFrame(frame);
-      if (now - lastFrame < interval) return;
-      lastFrame = now;
-      renderer.gl.uniform1f(renderer.uTime, (now - start) / 1000);
-      renderer.gl.clear(renderer.gl.COLOR_BUFFER_BIT);
-      renderer.gl.drawArrays(renderer.gl.TRIANGLE_STRIP, 0, 4);
+    // Create embed div inside the background container if needed
+    var embed = document.getElementById("unicorn-embed");
+    if (!embed) {
+      embed = document.createElement("div");
+      embed.id = "unicorn-embed";
+      bg.appendChild(embed);
     }
-    rafId = requestAnimationFrame(frame);
+
+    if (embed.querySelector("canvas")) return;
+
+    loadScript("https://cdn.jsdelivr.net/gh/hiunicornstudio/unicornstudio.js@v2.0.5/dist/unicornStudio.umd.js")
+      .then(function () {
+        return UnicornStudio.addScene({
+          elementId: "unicorn-embed",
+          fps: US_FPS,
+          scale: US_SCALE,
+          dpi: US_DPI,
+          filePath: getSceneBlobUrl(),
+          lazyLoad: true,
+          interactivity: {
+            mouse: {
+              disableMobile: false,
+              disabled: false
+            }
+          }
+        });
+      })
+      .then(function (s) {
+        scene = s;
+      })
+      .catch(function (err) {
+        console.error("UnicornStudio failed to load:", err);
+      });
   }
 
   if (document.readyState === "loading") {
@@ -449,19 +114,9 @@ function isDarkMode() {
     injectScene();
   }
 
-  // Watch for navigation changes
+  // Watch for SPA navigation changes
   var observer = new MutationObserver(function () {
     injectScene();
   });
   observer.observe(document.body, { childList: true, subtree: true });
-
-  // Watch for theme changes (class/attribute on <html>)
-  var themeObserver = new MutationObserver(applyTheme);
-  themeObserver.observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ["class", "data-theme"]
-  });
-
-  // Also watch prefers-color-scheme media query
-  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", applyTheme);
 })();
