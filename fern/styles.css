@@ -7,6 +7,7 @@
   border-color: transparent !important;
 }
 
+/* Main content wrapper — provides positioning context for the WebGL background */
 .canvas-wrapper {
   margin-top: 2px;
   position: relative;
@@ -30,7 +31,7 @@
   height: 100% !important;
 }
 
-/* Welcome page hero spacing */
+/* Welcome page hero section */
 .canvas-wrapper:has(.welcome-subheading) {
   padding-top: 160px;
 }
@@ -39,10 +40,20 @@
   margin-bottom: 160px;
 }
 
+.welcome-subheading p {
+  font-size: 1.25rem;
+  line-height: 1.6;
+  z-index: 1;
+  position: relative;
+  margin: 0;
+}
+
+/* Hide breadcrumb on welcome page */
 .canvas-wrapper:has(.welcome-subheading) .fern-breadcrumb {
   display: none;
 }
 
+/* Welcome page title sizing */
 .canvas-wrapper:has(.welcome-subheading) h1 {
   font-size: 3rem;
   line-height: 1.1;
