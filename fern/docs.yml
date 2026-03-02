@@ -12,7 +12,7 @@ title: Fern Docs Starter
 
 layout:
   searchbar-placement: header
-  page-width: full
+  page-width: 88rem
   tabs-placement: header
 
 tabs:
