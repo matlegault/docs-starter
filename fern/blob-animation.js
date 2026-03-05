@@ -32,32 +32,6 @@
     y: Math.random() * container.offsetHeight,
   };
 
-  container.addEventListener(
-    "mouseenter",
-    function () {
-      mouseInside = true;
-    },
-    false
-  );
-  container.addEventListener(
-    "mouseleave",
-    function () {
-      mouseInside = false;
-    },
-    false
-  );
-  document.addEventListener(
-    "mousemove",
-    function (event) {
-      if (!mouseInside) return;
-      var rect = canvas.getBoundingClientRect();
-      mouse = {
-        x: event.clientX - rect.left,
-        y: event.clientY - rect.top,
-      };
-    },
-    false
-  );
 
   var canvas = document.createElement("canvas");
   canvas.style.display = "block";
@@ -71,7 +45,6 @@
     canvas.height = container.offsetHeight;
   }
 
-  window.addEventListener("resize", resize, false);
   resize();
 
   var time;
@@ -105,7 +78,7 @@
     this.deface = args.deface || 50;
     this.rotation = args.rotation || 0;
     this.scale = 0;
-    this.alpha = 0;
+    this.alpha = 0.08;
     this.lineWidth = 0.5;
     this.delay = Math.random() * 100;
     this.vertex = [];
@@ -190,13 +163,44 @@
     deface: 5,
   });
 
+  var animationId;
+
   function animate() {
-    requestAnimationFrame(animate);
+    animationId = requestAnimationFrame(animate);
     time = new Date().getTime() * 0.001;
     context.save();
     blob.render(context);
     context.restore();
   }
+
+  function onMouseEnter() { mouseInside = true; }
+  function onMouseLeave() { mouseInside = false; }
+  function onMouseMove(event) {
+    if (!mouseInside) return;
+    var rect = canvas.getBoundingClientRect();
+    mouse = {
+      x: event.clientX - rect.left,
+      y: event.clientY - rect.top,
+    };
+  }
+
+  container.addEventListener("mouseenter", onMouseEnter, false);
+  container.addEventListener("mouseleave", onMouseLeave, false);
+  document.addEventListener("mousemove", onMouseMove, false);
+  window.addEventListener("resize", resize, false);
+
+  // Clean up when the container is removed from the DOM
+  var observer = new MutationObserver(function () {
+    if (!document.contains(container)) {
+      cancelAnimationFrame(animationId);
+      container.removeEventListener("mouseenter", onMouseEnter, false);
+      container.removeEventListener("mouseleave", onMouseLeave, false);
+      document.removeEventListener("mousemove", onMouseMove, false);
+      window.removeEventListener("resize", resize, false);
+      observer.disconnect();
+    }
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
 
   animate();
 })();
