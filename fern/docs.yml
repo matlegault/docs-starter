@@ -93,6 +93,7 @@ colors:
 theme:
   page-actions: toolbar
   footer-nav: minimal
+  tabs: bubble
   
 
 logo:

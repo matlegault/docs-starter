@@ -12,8 +12,6 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  /* isolation: isolate; */
-  /* background: var(--background); */
   -webkit-mask-image: linear-gradient(to bottom, black 40%, transparent 85%);
   mask-image: linear-gradient(to bottom, black 40%, transparent 85%);
 }
